@@ -1,9 +1,20 @@
 package com.banking.repository;
 
-public class LoanRepository {
+import java.util.List;
 
-	public LoanRepository() {
-		// TODO Auto-generated constructor stub
-	}
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
+import com.banking.model.LoanApplication;
+import com.banking.model.LoanStatus;
+import com.banking.model.User;
+
+@Repository
+public interface LoanRepository extends JpaRepository<LoanApplication, Long>{
+
+	List<LoanApplication> findByUserOrderByCreatedAtDesc(User user);
+	
+	List<LoanApplication> findByStatusOrderByCreatedAtDesc(LoanStatus status);
+	
+	List<LoanApplication> findAllByOrderByCreatedAtDesc();
 }
