@@ -1,9 +1,69 @@
 package com.banking.dto;
 
+import java.math.BigDecimal;
+
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
 public class TransactionDto {
 
+	@NotBlank(message = "From Account Number is Required")
+	private String fromAccountNumber;
+	
+	@NotBlank(message = "To Account Number is Required")
+	private String toAccountNumber;
+	
+	@NotNull(message = "Amount is Required")
+	@DecimalMin(value = "0.01",message = "Amount must be Greater than 0")
+	private BigDecimal amount;
+	
+	private String description;
+	private String reference;
+	
 	public TransactionDto() {
-		// TODO Auto-generated constructor stub
+	
 	}
 
+	public String getFromAccountNumber() {
+		return fromAccountNumber;
+	}
+
+	public void setFromAccountNumber(String fromAccountNumber) {
+		this.fromAccountNumber = fromAccountNumber;
+	}
+
+	public String getToAccountNumber() {
+		return toAccountNumber;
+	}
+
+	public void setToAccountNumber(String toAccountNumber) {
+		this.toAccountNumber = toAccountNumber;
+	}
+
+	public BigDecimal getAmount() {
+		return amount;
+	}
+
+	public void setAmount(BigDecimal amount) {
+		this.amount = amount;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public String getReference() {
+		return reference;
+	}
+
+	public void setReference(String reference) {
+		this.reference = reference;
+	}
+	
+	
 }
