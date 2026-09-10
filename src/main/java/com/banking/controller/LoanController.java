@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.banking.dto.LoanApplicationDto;
+import com.banking.dto.LoanResponse;
 import com.banking.model.LoanApplication;
 import com.banking.model.LoanStatus;
 import com.banking.model.User;
@@ -37,7 +38,7 @@ public class LoanController {
 	@PostMapping("/apply")
 	public ResponseEntity<?> applyForLoan(@Valid @RequestBody LoanApplicationDto loanDto, Authentication authentication){
 		try {
-			User user = userService.findByUsername(authentication.getName()).orElseThrow();
+			User user = userService.findByUsername(authentication.getName());
 			LoanApplication application = loanService.submitApplication(user, loanDto);
 			return ResponseEntity.ok(application);
 		}catch (Exception e) {
@@ -47,8 +48,8 @@ public class LoanController {
 	
 	@GetMapping("/my-applications")
 	public ResponseEntity<?> getUserApplications(Authentication authentication){
-		User user = userService.findByUsername(authentication.getName()).orElseThrow();
-		List<LoanApplication> applications = loanService.getUserApplications(user);
+		User user = userService.findByUsername(authentication.getName());
+		List<LoanResponse> applications = loanService.getLoansForUser(user.getUsername());
 		return ResponseEntity.ok(applications);
 	}
 	
@@ -67,7 +68,7 @@ public class LoanController {
 			String commments = reviewRequest.get("comments");
 			
 			LoanApplication application = loanService.reviewApplication(applicationId, status, commments);
-			return ResponseEntity.ok(application);
+			return ResponseEntity.ok(LoanResponse.fromEntity(application));
 		} catch (Exception e) {
 			return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
 		}

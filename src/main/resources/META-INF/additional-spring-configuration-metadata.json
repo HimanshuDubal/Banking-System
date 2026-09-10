@@ -1,0 +1,12 @@
+{"properties": [
+  {
+    "name": "app.jwtSecret",
+    "type": "java.lang.String",
+    "description": "A Secret Key to encode the claims in unreadable form"
+  },
+  {
+    "name": "app.jwtExpirationInMs",
+    "type": "java.lang.String",
+    "description": "The Expirations time for JWT token"
+  }
+]}
