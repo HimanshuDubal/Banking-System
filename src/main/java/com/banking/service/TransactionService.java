@@ -142,7 +142,6 @@ public class TransactionService {
 				.orElseThrow(() -> new RuntimeException("Transaction not found for this id " + id));
 	}
 	 
-	
 	public Page<Transaction> getAccountTransactions(String accountNumber, Pageable pageable) {
 	 		Account account = accountService.findByAccountNumber(accountNumber);
 	 		return transactionRepository.findByAccount(account, pageable);

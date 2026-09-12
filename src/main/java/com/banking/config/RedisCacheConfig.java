@@ -18,6 +18,7 @@ import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 import com.banking.dto.AccountResponse;
+import com.banking.dto.FixedDepositResponse;
 import com.banking.dto.LoanResponse;
 import com.banking.dto.PendingTransferOtp;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -71,13 +72,16 @@ public class RedisCacheConfig {
 
         Map<String, RedisCacheConfiguration> perCacheConfig = new HashMap<>();
 
+
         perCacheConfig.put("accounts", defaultConfig
                 .entryTtl(Duration.ofMinutes(2))
                 .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(typedSerializer(AccountResponse.class))));
 
+
         perCacheConfig.put("loans", defaultConfig
                 .entryTtl(Duration.ofMinutes(2))
                 .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(typedSerializer(LoanResponse.class))));
+
 
         perCacheConfig.put("loansByUser", defaultConfig
                 .entryTtl(Duration.ofMinutes(2))
@@ -85,6 +89,13 @@ public class RedisCacheConfig {
 
         perCacheConfig.put("transactions", defaultConfig.entryTtl(Duration.ofMinutes(2)));
 
+        perCacheConfig.put("fixedDeposits", defaultConfig
+                .entryTtl(Duration.ofMinutes(2))
+                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(typedSerializer(FixedDepositResponse.class))));
+ 
+        perCacheConfig.put("fixedDepositsByUser", defaultConfig
+                .entryTtl(Duration.ofMinutes(2))
+                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(typedListSerializer(FixedDepositResponse.class))));
 
         perCacheConfig.put("userDetails", defaultConfig
                 .entryTtl(Duration.ofMinutes(10))

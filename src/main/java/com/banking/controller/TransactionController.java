@@ -37,16 +37,17 @@ public class TransactionController {
 	private OtpService otpService;
 
 	@PostMapping("/transfer")
-	public ResponseEntity<?> transferFunds(@Valid @RequestBody TransactionDto transactionDto, Authentication authentication){
-		if(otpService.requiresOtp(transactionDto.getAmount())) {
-			String otpReference = otpService.initiateTransfer(transactionDto, authentication.getName());
-			return ResponseEntity.status(HttpStatus.ACCEPTED).body(Map.of(
-					"OTP Required", true,
-					"OTP Reference", otpReference,
-					"Message", "An OTP has been sent to your registered email. Confirm it to complete this transfer"));
-		}
-		Transaction transaction = transactionService.processTransfer(transactionDto);
-		return ResponseEntity.ok(TransactionResponse.fromEntity(transaction));
+	public ResponseEntity<?> transfer(@RequestBody TransactionDto dto, Authentication authentication) {
+	    if (otpService.requiresOtp(dto.getAmount())) {
+	        String otpReference = otpService.initiateTransfer(dto, authentication.getName());
+	        return ResponseEntity.status(HttpStatus.ACCEPTED).body(Map.of(
+	                "otpRequired", true,
+	                "otpReference", otpReference,
+	                "message", "An OTP has been sent to your registered email. Confirm it to complete this transfer."
+	        ));
+	    }
+	    Transaction transaction = transactionService.processTransfer(dto);
+	    return ResponseEntity.ok(TransactionResponse.fromEntity(transaction));
 	}
 	
 	@PostMapping("/transfer/verify-otp")
