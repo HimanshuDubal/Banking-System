@@ -3,13 +3,17 @@ package com.banking.service;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.banking.dto.AccountCreationDto;
+import com.banking.dto.AccountResponse;
 import com.banking.model.Account;
 import com.banking.model.AccountType;
 import com.banking.model.User;
@@ -22,6 +26,9 @@ public class AccountService {
 	@Autowired
 	private AccountRepository accountRepository;
 	
+	@Autowired
+	private EmailServiceImpl emailServiceImpl;
+	
 	public Account createAccount(User user,AccountCreationDto accountDto) {
 		
 		Account account = new Account();
@@ -33,6 +40,11 @@ public class AccountService {
 		if(accountDto.getAccountType() == AccountType.CURRENT) {
 			account.setOverdraftLimit(new BigDecimal("10000"));
 		}
+		emailServiceImpl.sendEmail(user.getEmail(),
+				"Welcome to Banking System", 
+				"<h2>Welcome " + user.getUsername() + "!</h2>"
+					+"<p>Your Account has been Successfully Created.</p>"
+					+"<p>Your Account Details are " + accountDto + "!</p>");
 		
 		return accountRepository.save(account);
 	}
@@ -44,6 +56,13 @@ public class AccountService {
 	public Account findByAccountNumber(String accountnumber) {
 		return accountRepository.findByAccountNumber(accountnumber)
 				.orElseThrow(() -> new RuntimeException("Account Not Found for this Account Number " + accountnumber));
+	}
+	
+	@Cacheable(value = "accounts", key = "#accountnumber")
+	public AccountResponse getAccountDetails(String accountnumber) {
+		Account account = accountRepository.findByAccountNumber(accountnumber)
+				.orElseThrow(() -> new RuntimeException("Account Not Found: " + accountnumber));
+		return AccountResponse.fromEntity(account);
 	}
 	
 	public Account updateBalance(Account account, BigDecimal newBalance) {

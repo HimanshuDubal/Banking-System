@@ -1,76 +1,45 @@
-package com.banking.model;
+package com.banking.dto;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.Min;
+import com.banking.model.LoanApplication;
+import com.banking.model.LoanStatus;
+import com.banking.model.LoanType;
 
-@Entity
-@Table(name = "loan_applications")
-public class LoanApplication {
+public class LoanResponse {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private long id;
-	
-	@Column(unique = true, nullable = false)
 	private String applicationNumber;
-	
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "user_id", nullable = false)
-	private User user;
-	
-	@Enumerated(EnumType.STRING)
+	private String applicantUsername;
 	private LoanType loanType;
-	
-	@DecimalMin(value = "1000.0")
 	private BigDecimal requestedAmount;
-	
-	@DecimalMin(value = "0.0")
 	private BigDecimal interestRate;
-	
-	@Min(value = 1)
 	private Integer termInMonths;
-	
 	private String purpose;
-	
-	@DecimalMin(value = "0.0")
 	private BigDecimal monthlyIncome;
-	
-	@DecimalMin(value = "0.0")
 	private BigDecimal existingDebt;
-	
-	@Enumerated(EnumType.STRING)
-	private LoanStatus status = LoanStatus.SUBMITTED;
-	
-	private LocalDateTime lastReminderSentAt;
+	private LoanStatus status;
 	private String managerComments;
-	private LocalDateTime createdAt = LocalDateTime.now();
+	private LocalDateTime createdAt;
 	private LocalDateTime reviewedAt;
 	
-	public LoanApplication(){
-		
-	}
-
-	public long getId() {
-		return id;
-	}
-
-	public void setId(long id) {
-		this.id = id;
-	}
+	 public static LoanResponse fromEntity(LoanApplication loan) {
+	        LoanResponse dto = new LoanResponse();
+	        dto.applicationNumber = loan.getApplicationNumber();
+	        dto.applicantUsername = loan.getUser() != null ? loan.getUser().getUsername() : null;
+	        dto.loanType = loan.getLoanType();
+	        dto.requestedAmount = loan.getRequestedAmount();
+	        dto.interestRate = loan.getInterestRate();
+	        dto.termInMonths = loan.getTermInMonths();
+	        dto.purpose = loan.getPurpose();
+	        dto.monthlyIncome = loan.getMonthlyIncome();
+	        dto.existingDebt = loan.getExistingDebt();
+	        dto.status = loan.getStatus();
+	        dto.managerComments = loan.getManagerComments();
+	        dto.createdAt = loan.getCreatedAt();
+	        dto.reviewedAt = loan.getReviewedAt();
+	        return dto;
+	    }
 
 	public String getApplicationNumber() {
 		return applicationNumber;
@@ -80,12 +49,12 @@ public class LoanApplication {
 		this.applicationNumber = applicationNumber;
 	}
 
-	public User getUser() {
-		return user;
+	public String getApplicantUsername() {
+		return applicantUsername;
 	}
 
-	public void setUser(User user) {
-		this.user = user;
+	public void setApplicantUsername(String applicantUsername) {
+		this.applicantUsername = applicantUsername;
 	}
 
 	public LoanType getLoanType() {
@@ -175,14 +144,7 @@ public class LoanApplication {
 	public void setReviewedAt(LocalDateTime reviewedAt) {
 		this.reviewedAt = reviewedAt;
 	}
+	 
+	 
 
-	public LocalDateTime getLastReminderSentAt() {
-		return lastReminderSentAt;
-	}
-
-	public void setLastReminderSentAt(LocalDateTime lastReminderSentAt) {
-		this.lastReminderSentAt = lastReminderSentAt;
-	}
-
-	
 }

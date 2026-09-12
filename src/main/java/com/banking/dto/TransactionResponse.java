@@ -1,67 +1,43 @@
-package com.banking.model;
+package com.banking.dto;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-import jakarta.persistence.*;
-import jakarta.validation.constraints.DecimalMin;
-import lombok.Builder;
+import com.banking.model.Transaction;
+import com.banking.model.TransactionStatus;
+import com.banking.model.TransactionType;
 
-@Entity
-@Table(name = "transactions")
-public class Transaction {
+public class TransactionResponse {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private long id;
-	
-	@Column(unique = true,nullable = false)
 	private String transactionId;
-	
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "from_account_id")
-	private Account fromAccount;
-	
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "to_account_id")
-	private Account toAccount;
-	
-	@DecimalMin(value = "0.01")
+	private String fromAccountNumber;
+	private String toAccountNumber;
 	private BigDecimal amount;
-	
-	@Enumerated(EnumType.STRING)
 	private TransactionType transactionType;
-	
-	@Enumerated(EnumType.STRING)
-	private TransactionStatus status = TransactionStatus.PENDING;
-	
+	private TransactionStatus status;
 	private String description;
 	private String reference;
 	private BigDecimal balanceAfter;
-	
-	private LocalDateTime createdAt = LocalDateTime.now();
+	private LocalDateTime createdAt;
 	private LocalDateTime processedAt;
 	
-	 public Transaction() {
-	 }
-
-	 public Transaction(String transactionId, Account fromAccount, Account toAccount,
-	            BigDecimal amount, TransactionType transactionType, String description) {
-        this.transactionId = transactionId;
-        this.fromAccount = fromAccount;
-	    this.toAccount = toAccount;
-        this.amount = amount;
-        this.transactionType = transactionType;
-        this.description = description;
-	 }
-
-	public long getId() {
-		return id;
-	}
-
-	public void setId(long id) {
-		this.id = id;
-	}
+	public static TransactionResponse fromEntity(Transaction txn) {
+        TransactionResponse dto = new TransactionResponse();
+        dto.transactionId = txn.getTransactionId();
+        // fromAccount/toAccount are lazy-loaded proxies — only pull the account
+        // number out of them, never let the full Account (and its User) escape.
+        dto.fromAccountNumber = txn.getFromAccount() != null ? txn.getFromAccount().getAccountNumber() : null;
+        dto.toAccountNumber = txn.getToAccount() != null ? txn.getToAccount().getAccountNumber() : null;
+        dto.amount = txn.getAmount();
+        dto.transactionType = txn.getTransactionType();
+        dto.status = txn.getStatus();
+        dto.description = txn.getDescription();
+        dto.reference = txn.getReference();
+        dto.balanceAfter = txn.getBalanceAfter();
+        dto.createdAt = txn.getCreatedAt();
+        dto.processedAt = txn.getProcessedAt();
+        return dto;
+    }
 
 	public String getTransactionId() {
 		return transactionId;
@@ -71,20 +47,20 @@ public class Transaction {
 		this.transactionId = transactionId;
 	}
 
-	public Account getFromAccount() {
-		return fromAccount;
+	public String getFromAccountNumber() {
+		return fromAccountNumber;
 	}
 
-	public void setFromAccount(Account fromAccount) {
-		this.fromAccount = fromAccount;
+	public void setFromAccountNumber(String fromAccountNumber) {
+		this.fromAccountNumber = fromAccountNumber;
 	}
 
-	public Account getToAccount() {
-		return toAccount;
+	public String getToAccountNumber() {
+		return toAccountNumber;
 	}
 
-	public void setToAccount(Account toAccount) {
-		this.toAccount = toAccount;
+	public void setToAccountNumber(String toAccountNumber) {
+		this.toAccountNumber = toAccountNumber;
 	}
 
 	public BigDecimal getAmount() {
@@ -150,5 +126,7 @@ public class Transaction {
 	public void setProcessedAt(LocalDateTime processedAt) {
 		this.processedAt = processedAt;
 	}
-	 
+	
+	
+
 }

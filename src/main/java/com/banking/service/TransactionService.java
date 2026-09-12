@@ -5,6 +5,8 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -30,17 +32,22 @@ public class TransactionService {
 	@Autowired
 	private NotificationService notificationService;
 	
+	@Caching(evict = {
+			@CacheEvict(value = "accounts", key = "#transactionDto.fromAccountNumber"),
+			@CacheEvict(value = "accounts", key = "#transactionDto.toAccountNumber"),
+			@CacheEvict(value = "transactions", allEntries = true)
+	})
 	public Transaction processTransfer(TransactionDto transactionDto) {
 		Account fromAccount = accountService.findByAccountNumber(transactionDto.getFromAccountNumber());
-        Account toAccount = accountService.findByAccountNumber(transactionDto.getToAccountNumber());
+		Account toAccount = accountService.findByAccountNumber(transactionDto.getToAccountNumber());
         
-        BigDecimal availableBalance = fromAccount.getBalance().add(fromAccount.getOverdraftLimit());
-        if (availableBalance.compareTo(transactionDto.getAmount()) < 0) {
-            throw new RuntimeException("Insufficient funds");
-        }
+		BigDecimal availableBalance = fromAccount.getBalance().add(fromAccount.getOverdraftLimit());
+		if (availableBalance.compareTo(transactionDto.getAmount()) < 0) {
+			throw new RuntimeException("Insufficient funds");
+		}
         
-        Transaction transaction = new Transaction();
-        transaction.setTransactionId(generateTransactionId());
+		Transaction transaction = new Transaction();
+		transaction.setTransactionId(generateTransactionId());
         transaction.setFromAccount(fromAccount);
         transaction.setToAccount(toAccount);
         transaction.setAmount(transactionDto.getAmount());
@@ -49,7 +56,7 @@ public class TransactionService {
         transaction.setReference(transactionDto.getReference());
 
         try {
-            BigDecimal newFromBalance = fromAccount.getBalance().subtract(transactionDto.getAmount());
+        	BigDecimal newFromBalance = fromAccount.getBalance().subtract(transactionDto.getAmount());
             BigDecimal newToBalance = toAccount.getBalance().add(transactionDto.getAmount());
 
             accountService.updateBalance(fromAccount, newFromBalance);
@@ -67,12 +74,16 @@ public class TransactionService {
             return savedTransaction;
 
         }catch (Exception e) {
-        	 transaction.setStatus(TransactionStatus.FAILED);
-             transactionRepository.save(transaction);
-             throw new RuntimeException("Transaction failed: " + e.getMessage());
+        	transaction.setStatus(TransactionStatus.FAILED);
+        	transactionRepository.save(transaction);
+        	throw new RuntimeException("Transaction failed: " + e.getMessage());
 		}
 	}
 	
+	@Caching(evict = {
+			@CacheEvict(value = "accounts", key = "#accountNumber"),
+			@CacheEvict(value = "transactions", allEntries = true)
+	})
 	public Transaction processDeposit(String accountNumber, BigDecimal amount, String description) {
         Account account = accountService.findByAccountNumber(accountNumber);
 
@@ -95,6 +106,10 @@ public class TransactionService {
         return savedTransaction;
     }
 
+	@Caching(evict = {
+			@CacheEvict(value = "accounts", key = "#accountNumber"),
+			@CacheEvict(value = "transactions", allEntries = true)
+	})
 	 public Transaction processWithdrawal(String accountNumber, BigDecimal amount, String description) {
 	        Account account = accountService.findByAccountNumber(accountNumber);
 
@@ -120,11 +135,17 @@ public class TransactionService {
 	        notificationService.sendTransactionNotification(account.getUser(), savedTransaction, "debited");
 
 	        return savedTransaction;
-	    }
+	}
 	
-	 public Page<Transaction> getAccountTransactions(String accountNumber, Pageable pageable) {
-	        Account account = accountService.findByAccountNumber(accountNumber);
-	        return transactionRepository.findByAccount(account, pageable);
+	public Transaction findById(long id) {
+		return transactionRepository.findById(id)
+				.orElseThrow(() -> new RuntimeException("Transaction not found for this id " + id));
+	}
+	 
+	
+	public Page<Transaction> getAccountTransactions(String accountNumber, Pageable pageable) {
+	 		Account account = accountService.findByAccountNumber(accountNumber);
+	 		return transactionRepository.findByAccount(account, pageable);
 	 }
 	 
 	private String generateTransactionId() {

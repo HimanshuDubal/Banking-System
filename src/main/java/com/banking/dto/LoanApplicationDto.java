@@ -31,6 +31,10 @@ public class LoanApplicationDto {
 	
 	@DecimalMin(value = "0.0", message = "Existing debt must be positive")
 	private BigDecimal existingDebt = BigDecimal.ZERO;
+	
+	private BigDecimal monthlyInstallment;
+	private Integer remainingMonths;
+	private BigDecimal remainingAmount;
 
 	public LoanApplicationDto() {
 		
@@ -83,5 +87,30 @@ public class LoanApplicationDto {
 	public void setExistingDebt(BigDecimal existingDebt) {
 		this.existingDebt = existingDebt;
 	}
+
+	public BigDecimal getMonthlyInstallment() {
+		return monthlyInstallment;
+	}
+
+	public void setMonthlyInstallment(BigDecimal monthlyInstallment) {
+		this.monthlyInstallment = monthlyInstallment;
+	}
+
+	public Integer getRemainingMonths() {
+		return remainingMonths;
+	}
+
+	public void setRemainingMonths(Integer remainingMonths) {
+		this.remainingMonths = remainingMonths;
+	}
+
+	public BigDecimal getRemainingAmount() {
+		return remainingAmount;
+	}
+
+	public void setRemainingAmount(BigDecimal remainingAmount) {
+		this.remainingAmount = remainingAmount;
+	}
+	
 	
 }

@@ -6,9 +6,12 @@ import java.util.List;
 import java.util.Set;
 
 import org.jspecify.annotations.Nullable;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+
+import com.banking.repository.UserRepository;
 
 import jakarta.persistence.*;
 import jakarta.persistence.Entity;
@@ -63,6 +66,7 @@ public class User implements UserDetails{
 	@OneToMany(mappedBy = "user",cascade = CascadeType.ALL,fetch = FetchType.LAZY)
 	private Set<LoanApplication> loanApplications;
 	
+	
 	public User(){
 		
 	}
@@ -103,15 +107,14 @@ public class User implements UserDetails{
 	}
 
 	@Override
-	public @Nullable String getPassword() {
-		// TODO Auto-generated method stub
-		return null;
+	public String getPassword() {
+		
+		return password;
 	}
 
 	@Override
 	public String getUsername() {
-		// TODO Auto-generated method stub
-		return null;
+		return username;
 	}
 
 	//Getter and Setter
@@ -218,5 +221,6 @@ public class User implements UserDetails{
 	public void setCredentialsNonExpired(boolean credentialsNonExpired) {
 		this.credentialsNonExpired = credentialsNonExpired;
 	}
+	
 	
 }
